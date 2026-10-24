@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f1e9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Just Note">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>Just Note</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f2f1e9;
+      --panel: #fffefa;
+      --ink: #20271f;
+      --muted: #85877e;
+      --line: #e8e8df;
+      --green: #385443;
+      --green-soft: #edf2e9;
+      --shadow: 0 24px 70px rgb(46 53 39 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 28px;
+      background:
+        radial-gradient(ellipse at 10% 8%, rgb(222 227 205 / 72%), transparent 35rem),
+        radial-gradient(ellipse at 95% 90%, rgb(232 223 195 / 40%), transparent 34rem),
+        var(--paper);
+      color: var(--ink);
+    }
+
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 286px minmax(0, 1fr);
+      max-width: 1240px;
+      min-height: min(860px, calc(100vh - 56px));
+      margin: 0 auto;
+      overflow: hidden;
+      background: var(--panel);
+      border: 1px solid rgb(50 53 43 / 6%);
+      border-radius: 25px;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      padding: 28px 20px 20px;
+      background: linear-gradient(165deg, #faf9f4 0%, #f8f7f1 100%);
+      border-right: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 28px 3px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -.045em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      color: white;
+      background: linear-gradient(145deg, #536e52, #304c3d);
+      border: 1px solid rgb(255 255 255 / 28%);
+      border-radius: 13px;
+      box-shadow: 0 5px 12px rgb(56 84 67 / 17%);
+    }
+
+    .brand-mark svg { width: 18px; height: 18px; }
+
+    .brand-copy { display: flex; flex-direction: column; gap: 3px; }
+    .brand-tagline { color: #92948a; font-size: 10px; font-weight: 450; letter-spacing: .01em; }
+
+    .profile-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: -12px 0 18px 3px;
+    }
+
+    .profile-label {
+      color: #92938a;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .profile-input {
+      width: 100%;
+      padding: 7px 9px;
+      color: #41483e;
+      background: #f1f0e9;
+      border: 1px solid #ecebe3;
+      border-radius: 9px;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .profile-input:focus { border-color: #b9c7b2; background: white; }
+    .profile-input::placeholder { color: #9a9b94; }
+
+    .new-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      min-height: 47px;
+      color: white;
+      background: linear-gradient(135deg, #48664f, #344f3e);
+      border: 0;
+      border-radius: 13px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 5px 12px rgb(56 84 67 / 14%);
+      transition: background .18s, transform .18s, box-shadow .18s;
+    }
+
+    .new-note:hover { background: #2e4939; box-shadow: 0 8px 18px rgb(56 84 67 / 20%); transform: translateY(-1px); }
+    .new-note svg { width: 17px; height: 17px; }
+
+    .search {
+      position: relative;
+      margin: 18px 0 27px;
+    }
+
+    .search svg {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 17px;
+      height: 17px;
+      color: #92948b;
+      pointer-events: none;
+    }
+
+    .search input {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px 0 38px;
+      color: var(--ink);
+      background: #f1f0e9;
+      border: 1px solid #ecebe3;
+      border-radius: 11px;
+      outline: none;
+      font-size: 13px;
+    }
+
+    .search input:focus { border-color: #b9c7b2; background: white; box-shadow: 0 0 0 3px rgb(82 107 80 / 8%); }
+    .search input::placeholder { color: #9a9b94; }
+
+    .folder-section { margin-bottom: 20px; }
+
+    .folder-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0 5px 8px 7px;
+    }
+
+    .folder-heading .section-label { margin: 0; }
+
+    .add-folder {
+      display: grid;
+      width: 25px;
+      height: 25px;
+      padding: 0;
+      place-items: center;
+      color: #788275;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .add-folder:hover { color: var(--green); background: var(--green-soft); }
+    .add-folder svg { width: 16px; height: 16px; }
+
+    .folders-list { display: flex; flex-direction: column; gap: 3px; }
+
+    .folder-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+      padding: 2px;
+      border-radius: 9px;
+    }
+
+    .folder-row.selected { background: var(--green-soft); }
+
+    .folder-select {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 7px 8px;
+      color: #61665c;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .folder-row.selected .folder-select { color: #385443; font-weight: 650; }
+    .folder-icon { flex: 0 0 auto; color: #849078; font-size: 14px; line-height: 1; }
+    .folder-name { overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
+    .folder-count { color: #9a9b91; font-size: 10px; }
+
+    .folder-delete {
+      display: grid;
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      place-items: center;
+      color: #9a9b91;
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      opacity: 0;
+    }
+
+    .folder-row:hover .folder-delete,
+    .folder-delete:focus-visible { opacity: 1; }
+    .folder-delete:hover { color: #a44d43; background: #faf0ed; }
+    .folder-delete svg { width: 14px; height: 14px; }
+
+    .folder-form { display: flex; gap: 5px; margin: 8px 2px 0; }
+    .folder-name-input {
+      flex: 1;
+      min-width: 0;
+      padding: 7px 8px;
+      background: white;
+      border: 1px solid #e8e9df;
+      border-radius: 8px;
+      outline: none;
+      font-size: 11px;
+    }
+
+    .folder-name-input:focus { border-color: #b9c7b2; }
+    .folder-form button {
+      padding: 0 9px;
+      color: white;
+      background: var(--green);
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .folder-form .cancel-folder { color: #74776e; background: #eeede7; }
+
+    .section-label {
+      display: flex;
+      justify-content: space-between;
+      margin: 0 7px 10px;
+      color: #92938a;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    #note-count {
+      min-width: 19px;
+      padding: 2px 6px;
+      color: #75816e;
+      background: #ebeee5;
+      border-radius: 20px;
+      font-size: 9px;
+      letter-spacing: 0;
+      text-align: center;
+    }
+
+    .notes-list {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+    }
+
+    .note-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      min-width: 0;
+      padding: 3px;
+      border-radius: 13px;
+      transition: background .16s;
+    }
+
+    .note-row:hover { background: #f1f0ea; }
+    .note-row.active { background: var(--green-soft); }
+
+    .note-toggle {
+      display: grid;
+      flex: 0 0 20px;
+      width: 20px;
+      height: 20px;
+      margin-top: 11px;
+      padding: 0;
+      place-items: center;
+      appearance: none;
+      color: transparent;
+      background: #fffefa;
+      border: 1px solid #d8dbd0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+
+    .note-toggle:hover { border-color: #8ca081; }
+    .note-toggle:checked { color: white; background: #56704f; border-color: #56704f; }
+    .note-toggle:checked::after { content: "✓"; font-size: 13px; font-weight: 700; line-height: 1; }
+
+    .note-item {
+      display: block;
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      padding: 9px 5px 9px 7px;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background .16s, transform .16s;
+    }
+
+    .note-row.active .note-item-title { color: #304b37; }
+    .note-row.completed .note-item-title { color: #92958b; text-decoration: line-through; }
+    .note-row.completed .note-item-preview { color: #a5a69e; }
+
+    .note-item-title {
+      display: block;
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 650;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .note-item-preview {
+      display: block;
+      overflow: hidden;
+      margin-top: 5px;
+      color: #82847b;
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .note-item-date {
+      display: block;
+      margin-top: 6px;
+      color: #a0a197;
+      font-size: 10px;
+    }
+
+    .note-delete {
+      display: grid;
+      flex: 0 0 28px;
+      width: 28px;
+      height: 28px;
+      margin-top: 6px;
+      padding: 0;
+      place-items: center;
+      color: #a0a197;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity .15s, color .15s, background .15s;
+    }
+
+    .note-row:hover .note-delete,
+    .note-delete:focus-visible { opacity: 1; }
+    .note-delete:hover { color: #a44d43; background: #faf0ed; }
+    .note-delete svg { width: 15px; height: 15px; }
+
+    .sidebar-footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 18px 4px 0;
+      color: #98998f;
+      font-size: 11px;
+    }
+
+    .workspace {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      padding: 26px 40px 24px;
+      background:
+        radial-gradient(ellipse at 88% 8%, rgb(246 245 235 / 72%), transparent 30rem),
+        var(--panel);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 42px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0efe8;
+    }
+
+    .save-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      color: #788275;
+      background: #f5f6f1;
+      border: 1px solid #eff0ea;
+      border-radius: 20px;
+      font-size: 11px;
+    }
+
+    .save-dot {
+      width: 7px;
+      height: 7px;
+      background: #8ba579;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgb(139 165 121 / 13%);
+    }
+
+    .delete-note, .back-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 10px;
+      color: #7e8178;
+      background: transparent;
+      border: 0;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-note:hover { color: #a44d43; background: #faf0ed; }
+    .delete-note svg { width: 15px; height: 15px; }
+    .back-button { display: none; }
+
+    .editor {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      width: min(100%, 690px);
+      margin: 59px auto 0;
+    }
+
+    .editor-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 23px;
+      color: #92948b;
+      font-size: 11px;
+      letter-spacing: .015em;
+    }
+
+    .meta-divider { width: 3px; height: 3px; background: #c3c4bc; border-radius: 50%; }
+
+    .title-input {
+      width: 100%;
+      padding: 0;
+      color: #20271f;
+      background: transparent;
+      border: 0;
+      outline: none;
+      font-size: clamp(28px, 4vw, 38px);
+      font-weight: 650;
+      letter-spacing: -.06em;
+      line-height: 1.2;
+    }
+
+    .title-input::placeholder { color: #c4c5bd; }
+
+    .schedule-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 27px;
+      padding: 14px 15px;
+      background: #f8f8f3;
+      border: 1px solid #efefe7;
+      border-radius: 12px;
+    }
+
+    .schedule-group-title {
+      color: #72796d;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .schedule-times {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .schedule-field {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      gap: 7px;
+    }
+
+    .schedule-label {
+      color: #92948b;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .optional-label { color: #a0a197; font-weight: 450; }
+
+    .schedule-input {
+      width: 100%;
+      min-width: 0;
+      padding: 8px;
+      color: #444c42;
+      background: #fffefa;
+      border: 1px solid #e8e9df;
+      border-radius: 8px;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .schedule-input:focus {
+      border-color: #b9c7b2;
+      box-shadow: 0 0 0 3px rgb(82 107 80 / 8%);
+    }
+
+    .note-folder-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 15px;
+      color: #72796d;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .note-folder-select {
+      min-width: 150px;
+      max-width: 100%;
+      padding: 8px 10px;
+      color: #444c42;
+      background: #fffefa;
+      border: 1px solid #e8e9df;
+      border-radius: 8px;
+      outline: none;
+      font-size: 12px;
+    }
+
+    .note-folder-select:focus { border-color: #b9c7b2; }
+
+    .body-input {
+      flex: 1;
+      min-height: 340px;
+      margin-top: 26px;
+      padding: 0;
+      color: #51574f;
+      background: transparent;
+      border: 0;
+      outline: none;
+      resize: none;
+      font-size: 15px;
+      line-height: 1.9;
+    }
+
+    .body-input::placeholder { color: #b4b5ad; }
+
+    .editor-footer {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 14px;
+      color: #96988e;
+      border-top: 1px solid #efeee9;
+      font-size: 10px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 420px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .empty-art {
+      position: relative;
+      width: 210px;
+      height: 180px;
+      margin-bottom: 24px;
+    }
+
+    .art-glow {
+      position: absolute;
+      inset: 16px 14px 8px;
+      background: radial-gradient(ellipse, #e9eddf 0%, rgb(239 240 228 / 48%) 54%, transparent 72%);
+      border-radius: 50%;
+    }
+
+    .paper-card {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 112px;
+      height: 136px;
+      padding: 17px 15px;
+      background: #fffefa;
+      border: 1px solid #eeede5;
+      border-radius: 13px;
+      box-shadow: 0 12px 30px rgb(59 67 50 / 9%);
+    }
+
+    .paper-card.back {
+      top: 24px;
+      left: 24px;
+      height: 126px;
+      background: #f6f3e9;
+      transform: rotate(-11deg);
+    }
+
+    .paper-card.front {
+      top: 20px;
+      right: 30px;
+      transform: rotate(7deg);
+    }
+
+    .paper-card .card-date {
+      width: 33px;
+      height: 5px;
+      background: #d9ddcf;
+      border-radius: 5px;
+    }
+
+    .paper-card .card-line {
+      height: 5px;
+      background: #e9e8df;
+      border-radius: 5px;
+    }
+
+    .paper-card .card-line.short { width: 65%; }
+    .paper-card .card-highlight {
+      width: 49px;
+      height: 17px;
+      margin-top: 2px;
+      background: #eaf0df;
+      border-radius: 5px;
+    }
+
+    .art-spark {
+      position: absolute;
+      top: 24px;
+      right: 19px;
+      width: 29px;
+      height: 29px;
+      color: #718363;
+      background: #f7f4e8;
+      border: 1px solid #efebdc;
+      border-radius: 10px;
+      font-size: 17px;
+      line-height: 27px;
+      transform: rotate(9deg);
+    }
+
+    .empty-state h1 { margin: 0; font-size: 23px; letter-spacing: -.045em; }
+    .empty-state p { max-width: 290px; margin: 10px 0 22px; color: #85887e; font-size: 13px; line-height: 1.7; }
+    .empty-state .new-note { width: auto; padding: 0 18px; }
+
+    .list-empty {
+      padding: 14px 8px;
+      color: #96978f;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 0; background: var(--panel); }
+      .app { display: block; min-height: 100dvh; border: 0; border-radius: 0; box-shadow: none; }
+      .sidebar { min-height: 100dvh; padding: 22px 18px 16px; border-right: 0; }
+      .brand { margin-bottom: 22px; }
+      .workspace { display: none; min-height: 100dvh; padding: 18px 22px 20px; }
+      .app.show-editor .sidebar { display: none; }
+      .app.show-editor .workspace { display: flex; }
+      .back-button { display: inline-flex; margin-left: -9px; }
+      .topbar { min-height: 32px; }
+      .editor { margin-top: 45px; }
+      .body-input { min-height: 48vh; }
+      .empty-art { margin-bottom: 18px; transform: scale(.92); }
+      .empty-state { min-height: 75dvh; }
+      .note-delete { opacity: 1; }
+      .folder-delete { opacity: 1; }
+    }
+
+    @media (max-width: 540px) {
+      .schedule-times { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    @media (min-width: 761px) and (max-height: 700px) {
+      body { padding: 14px; }
+      .app { min-height: calc(100vh - 28px); }
+      .editor { margin-top: 35px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <aside class="sidebar" aria-label="Notes">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M7 4.75h7.5L19 9.2v9.05A1.75 1.75 0 0 1 17.25 20h-10A1.75 1.75 0 0 1 5.5 18.25v-11A2.5 2.5 0 0 1 8 4.75Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 5v5h5M8.5 13h7M8.5 16h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="brand-copy">
+          <span>just note</span>
+          <span class="brand-tagline">A quieter place to think</span>
+        </span>
+      </div>
+      <label class="profile-field">
+        <span class="profile-label">Your name</span>
+        <input class="profile-input" id="profile-name" type="text" maxlength="40" placeholder="What should we call you?" autocomplete="nickname">
+      </label>
+
+      <button class="new-note" id="create-note" type="button">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        New note
+      </button>
+
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="Search your notes" autocomplete="off" aria-label="Search notes">
+      </label>
+
+      <section class="folder-section" aria-label="Note folders">
+        <div class="folder-heading">
+          <p class="section-label">Folders</p>
+          <button class="add-folder" id="add-folder" type="button" aria-label="Create folder" title="Create folder">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="folders-list" id="folders-list"></div>
+        <form class="folder-form" id="folder-form" hidden>
+          <input class="folder-name-input" id="folder-name-input" type="text" maxlength="40" placeholder="Folder name" aria-label="Folder name">
+          <button type="submit">Add</button>
+          <button class="cancel-folder" id="cancel-folder" type="button">Cancel</button>
+        </form>
+      </section>
+
+      <p class="section-label">Your notes <span id="note-count"></span></p>
+      <div class="notes-list" id="notes-list" aria-live="polite"></div>
+      <div class="sidebar-footer">
+        <span>All notes stay on this device</span>
+        <span>✦</span>
+      </div>
+    </aside>
+
+    <section class="workspace" aria-label="Note editor">
+      <div class="topbar">
+        <div style="display:flex;align-items:center">
+          <button class="back-button" id="back-button" type="button" aria-label="Back to notes">← Notes</button>
+          <div class="save-status"><span class="save-dot"></span><span id="save-status">Saved locally</span></div>
+        </div>
+        <button class="delete-note" id="delete-note" type="button" aria-label="Delete note">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7h15M9.5 10.5v7m5-7v7M6.5 7l.8 12a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4l.8-12M9 7V4.8h6V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Delete
+        </button>
+      </div>
+      <div class="editor" id="editor" hidden>
+        <div class="editor-meta"><span id="created-date"></span><span class="meta-divider"></span><span id="word-count">0 words</span></div>
+        <input class="title-input" id="title-input" type="text" maxlength="120" placeholder="Untitled note" aria-label="Note title">
+        <div class="schedule-group">
+          <span class="schedule-group-title">When do you want to do it?</span>
+          <div class="schedule-times">
+            <label class="schedule-field" for="schedule-input">
+              <span class="schedule-label">Start</span>
+              <input class="schedule-input" id="schedule-input" type="datetime-local" aria-label="Start date and time">
+            </label>
+            <label class="schedule-field" for="finish-input">
+              <span class="schedule-label">Finish <span class="optional-label">(optional)</span></span>
+              <input class="schedule-input" id="finish-input" type="datetime-local" aria-label="Finish date and time">
+            </label>
+          </div>
+        </div>
+        <label class="note-folder-field" for="note-folder">
+          Folder
+          <select class="note-folder-select" id="note-folder" aria-label="Note folder"></select>
+        </label>
+        <textarea class="body-input" id="body-input" placeholder="Start writing..." aria-label="Note content"></textarea>
+        <div class="editor-footer"><span>Your thoughts, safely on this device.</span><span id="char-count">0 characters</span></div>
+      </div>
+      <div class="empty-state" id="empty-state">
+        <div class="empty-art" aria-hidden="true">
+          <div class="art-glow"></div>
+          <div class="paper-card back">
+            <span class="card-date"></span>
+            <span class="card-line"></span>
+            <span class="card-line short"></span>
+            <span class="card-line"></span>
+          </div>
+          <div class="paper-card front">
+            <span class="card-date"></span>
+            <span class="card-line"></span>
+            <span class="card-line short"></span>
+            <span class="card-highlight"></span>
+            <span class="card-line"></span>
+          </div>
+          <span class="art-spark">✳</span>
+        </div>
+        <h1>A little space for your thoughts</h1>
+        <p>Capture an idea, make a list, or jot down whatever's on your mind.</p>
+        <button class="new-note" id="empty-create" type="button">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Create your first note
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = "just-note-notes-v1";
+      const FOLDERS_KEY = "just-note-folders-v1";
+      const PROFILE_KEY = "just-note-profile-v1";
+      const app = document.getElementById("app");
+      const notesList = document.getElementById("notes-list");
+      const foldersList = document.getElementById("folders-list");
+      const searchInput = document.getElementById("search");
+      const count = document.getElementById("note-count");
+      const profileInput = document.getElementById("profile-name");
+      const folderForm = document.getElementById("folder-form");
+      const folderNameInput = document.getElementById("folder-name-input");
+      const noteFolderSelect = document.getElementById("note-folder");
+      const editor = document.getElementById("editor");
+      const emptyState = document.getElementById("empty-state");
+      const titleInput = document.getElementById("title-input");
+      const scheduleInput = document.getElementById("schedule-input");
+      const finishInput = document.getElementById("finish-input");
+      const bodyInput = document.getElementById("body-input");
+      const saveStatus = document.getElementById("save-status");
+      const deleteButton = document.getElementById("delete-note");
+      const createdDate = document.getElementById("created-date");
+      const wordCount = document.getElementById("word-count");
+      const charCount = document.getElementById("char-count");
+      let notes = loadNotes();
+      let folders = loadFolders();
+      let activeFolderId = "all";
+      let activeId = null;
+      let saveTimer;
+
+      function loadNotes() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          const parsed = stored ? JSON.parse(stored) : [];
+          return Array.isArray(parsed)
+            ? parsed.filter(note => note && typeof note.id === "string" && typeof note.title === "string" && typeof note.body === "string")
+            : [];
+        } catch (error) {
+          console.error("Could not load notes from local storage.", error);
+          return [];
+        }
+      }
+
+      function persistNotes() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+          saveStatus.textContent = "Saved locally";
+        } catch (error) {
+          saveStatus.textContent = "Couldn't save";
+          console.error("Could not save notes to local storage.", error);
+        }
+      }
+
+      function loadFolders() {
+        try {
+          const stored = localStorage.getItem(FOLDERS_KEY);
+          const parsed = stored ? JSON.parse(stored) : [];
+          return Array.isArray(parsed)
+            ? parsed.filter(folder => folder && typeof folder.id === "string" && typeof folder.name === "string")
+            : [];
+        } catch (error) {
+          console.error("Could not load folders from local storage.", error);
+          return [];
+        }
+      }
+
+      function persistFolders() {
+        try {
+          localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
+          return true;
+        } catch (error) {
+          console.error("Could not save folders to local storage.", error);
+          return false;
+        }
+      }
+
+      function loadProfileName() {
+        try {
+          return localStorage.getItem(PROFILE_KEY) || "";
+        } catch (error) {
+          console.error("Could not load your name from local storage.", error);
+          return "";
+        }
+      }
+
+      function persistProfileName() {
+        try {
+          const name = profileInput.value.trim();
+          if (name) localStorage.setItem(PROFILE_KEY, name);
+          else localStorage.removeItem(PROFILE_KEY);
+        } catch (error) {
+          console.error("Could not save your name to local storage.", error);
+        }
+      }
+
+      function formatDate(value, options) {
+        return new Intl.DateTimeFormat(undefined, options).format(new Date(value));
+      }
+
+      function getPreview(body) {
+        return body.trim().replace(/\s+/g, " ") || "No additional text";
+      }
+
+      function renderFolderOptions(selectedId = noteFolderSelect.value) {
+        noteFolderSelect.replaceChildren();
+        const unfiled = document.createElement("option");
+        unfiled.value = "";
+        unfiled.textContent = "No folder";
+        noteFolderSelect.append(unfiled);
+        for (const folder of folders) {
+          const option = document.createElement("option");
+          option.value = folder.id;
+          option.textContent = folder.name;
+          noteFolderSelect.append(option);
+        }
+        noteFolderSelect.value = folders.some(folder => folder.id === selectedId) ? selectedId : "";
+      }
+
+      function renderFolders() {
+        foldersList.replaceChildren();
+        const entries = [
+          { id: "all", name: "All notes", icon: "▤", notes: notes.length },
+          { id: "unfiled", name: "Unfiled", icon: "▫", notes: notes.filter(note => !folders.some(folder => folder.id === note.folderId)).length },
+          ...folders.map(folder => ({
+            id: folder.id,
+            name: folder.name,
+            icon: "▰",
+            notes: notes.filter(note => note.folderId === folder.id).length
+          }))
+        ];
+
+        for (const entry of entries) {
+          const row = document.createElement("div");
+          row.className = `folder-row${activeFolderId === entry.id ? " selected" : ""}`;
+          const selectButton = document.createElement("button");
+          selectButton.type = "button";
+          selectButton.className = "folder-select";
+          selectButton.setAttribute("aria-pressed", activeFolderId === entry.id ? "true" : "false");
+          const icon = document.createElement("span");
+          icon.className = "folder-icon";
+          icon.setAttribute("aria-hidden", "true");
+          icon.textContent = entry.icon;
+          const name = document.createElement("span");
+          name.className = "folder-name";
+          name.textContent = entry.name;
+          const folderCount = document.createElement("span");
+          folderCount.className = "folder-count";
+          folderCount.textContent = entry.notes;
+          selectButton.append(icon, name, folderCount);
+          selectButton.addEventListener("click", () => {
+            activeFolderId = entry.id;
+            renderFolders();
+            renderList();
+          });
+          row.append(selectButton);
+
+          if (entry.id !== "all" && entry.id !== "unfiled") {
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "folder-delete";
+            removeButton.setAttribute("aria-label", `Delete ${entry.name} folder`);
+            removeButton.title = "Delete folder";
+            removeButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7h15M9.5 10.5v7m5-7v7M6.5 7l.8 12a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4l.8-12M9 7V4.8h6V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            removeButton.addEventListener("click", () => deleteFolder(entry.id));
+            row.append(removeButton);
+          }
+          foldersList.append(row);
+        }
+      }
+
+      function renderList() {
+        const query = searchInput.value.trim().toLowerCase();
+        const visibleNotes = [...notes]
+          .sort((a, b) => b.updatedAt - a.updatedAt)
+          .filter(note => {
+            const matchesFolder = activeFolderId === "all"
+              || (activeFolderId === "unfiled" && !folders.some(folder => folder.id === note.folderId))
+              || note.folderId === activeFolderId;
+            return matchesFolder && `${note.title} ${note.body}`.toLowerCase().includes(query);
+          });
+        notesList.replaceChildren();
+        count.textContent = visibleNotes.length ? `(${visibleNotes.length})` : "";
+        if (visibleNotes.length === 0) {
+          const message = document.createElement("div");
+          message.className = "list-empty";
+          message.textContent = query
+            ? "No notes match your search."
+            : activeFolderId === "unfiled"
+              ? "No unfiled notes."
+              : activeFolderId !== "all" ? "This folder is empty." : "Your notes will appear here.";
+          notesList.append(message);
+          return;
+        }
+
+        for (const note of visibleNotes) {
+          const row = document.createElement("div");
+          row.className = `note-row${note.id === activeId ? " active" : ""}${note.completed ? " completed" : ""}`;
+          const toggle = document.createElement("input");
+          toggle.type = "checkbox";
+          toggle.className = "note-toggle";
+          toggle.checked = Boolean(note.completed);
+          toggle.setAttribute("aria-label", note.completed ? "Mark note as not done" : "Mark note as done");
+          toggle.addEventListener("change", () => toggleCompleted(note.id));
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "note-item";
+          button.setAttribute("aria-current", note.id === activeId ? "true" : "false");
+          const title = document.createElement("span");
+          title.className = "note-item-title";
+          title.textContent = note.title.trim() || "Untitled note";
+          const preview = document.createElement("span");
+          preview.className = "note-item-preview";
+          preview.textContent = getPreview(note.body);
+          const hasSchedule = typeof note.scheduledAt === "string" && Number.isFinite(new Date(note.scheduledAt).getTime());
+          const hasFinish = typeof note.finishAt === "string" && Number.isFinite(new Date(note.finishAt).getTime());
+          const formatDateTime = value => formatDate(value, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+          const date = document.createElement("span");
+          date.className = "note-item-date";
+          date.textContent = hasSchedule
+            ? `Do: ${formatDateTime(note.scheduledAt)}`
+            : hasFinish ? `Finish: ${formatDateTime(note.finishAt)}` : formatDate(note.updatedAt, { month: "short", day: "numeric" });
+          button.append(title, preview, date);
+          if (hasSchedule && hasFinish) {
+            const finishDate = document.createElement("span");
+            finishDate.className = "note-item-date";
+            finishDate.textContent = `Finish: ${formatDateTime(note.finishAt)}`;
+            button.append(finishDate);
+          }
+          button.addEventListener("click", () => selectNote(note.id));
+          const deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.className = "note-delete";
+          deleteButton.setAttribute("aria-label", `Delete ${note.title.trim() || "Untitled note"}`);
+          deleteButton.title = "Delete note";
+          deleteButton.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 7h15M9.5 10.5v7m5-7v7M6.5 7l.8 12a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4l.8-12M9 7V4.8h6V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          deleteButton.addEventListener("click", () => deleteNote(note.id));
+          row.append(toggle, button, deleteButton);
+          notesList.append(row);
+        }
+      }
+
+      function updateCounts() {
+        const body = bodyInput.value;
+        const words = body.trim() ? body.trim().split(/\s+/).length : 0;
+        wordCount.textContent = `${words} ${words === 1 ? "word" : "words"}`;
+        charCount.textContent = `${body.length} ${body.length === 1 ? "character" : "characters"}`;
+      }
+
+      function showSelection() {
+        const note = notes.find(item => item.id === activeId);
+        const hasNote = Boolean(note);
+        editor.hidden = !hasNote;
+        emptyState.hidden = hasNote;
+        deleteButton.hidden = !hasNote;
+        saveStatus.closest(".save-status").hidden = !hasNote;
+        if (hasNote) {
+          titleInput.value = note.title;
+          bodyInput.value = note.body;
+          scheduleInput.value = typeof note.scheduledAt === "string" ? note.scheduledAt : "";
+          finishInput.value = typeof note.finishAt === "string" ? note.finishAt : "";
+          renderFolderOptions(note.folderId || "");
+          createdDate.textContent = `Created ${formatDate(note.createdAt, { month: "long", day: "numeric", year: "numeric" })}`;
+          saveStatus.textContent = "Saved locally";
+          updateCounts();
+        }
+      }
+
+      function selectNote(id) {
+        activeId = id;
+        showSelection();
+        renderList();
+        app.classList.add("show-editor");
+      }
+
+      function createNote() {
+        const now = Date.now();
+        const note = {
+          id: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${now}-${Math.random().toString(16).slice(2)}`,
+          title: "",
+          body: "",
+          createdAt: now,
+          updatedAt: now,
+          folderId: folders.some(folder => folder.id === activeFolderId) ? activeFolderId : ""
+        };
+        notes.push(note);
+        activeId = note.id;
+        persistNotes();
+        renderList();
+        showSelection();
+        app.classList.add("show-editor");
+        titleInput.focus();
+      }
+
+      function saveEditor() {
+        const note = notes.find(item => item.id === activeId);
+        if (!note) return;
+        note.title = titleInput.value;
+        note.body = bodyInput.value;
+        note.scheduledAt = scheduleInput.value;
+        note.finishAt = finishInput.value;
+        note.folderId = noteFolderSelect.value;
+        note.updatedAt = Date.now();
+        saveStatus.textContent = "Saving...";
+        updateCounts();
+        renderFolders();
+        renderList();
+        window.clearTimeout(saveTimer);
+        saveTimer = window.setTimeout(persistNotes, 250);
+      }
+
+      function deleteActiveNote() {
+        if (!activeId) return;
+        deleteNote(activeId);
+        app.classList.remove("show-editor");
+      }
+
+      function deleteNote(id) {
+        notes = notes.filter(note => note.id !== id);
+        if (activeId === id) {
+          activeId = null;
+          showSelection();
+        }
+        persistNotes();
+        renderList();
+      }
+
+      function toggleCompleted(id) {
+        const note = notes.find(item => item.id === id);
+        if (!note) return;
+        note.completed = !note.completed;
+        note.updatedAt = Date.now();
+        persistNotes();
+        renderList();
+      }
+
+      function deleteFolder(id) {
+        folders = folders.filter(folder => folder.id !== id);
+        notes = notes.map(note => note.folderId === id ? { ...note, folderId: "" } : note);
+        if (activeFolderId === id) activeFolderId = "all";
+        persistFolders();
+        persistNotes();
+        renderFolderOptions();
+        renderFolders();
+        renderList();
+      }
+
+      function createFolder(event) {
+        event.preventDefault();
+        const name = folderNameInput.value.trim();
+        if (!name) {
+          folderNameInput.focus();
+          return;
+        }
+        if (folders.some(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+          folderNameInput.setCustomValidity("A folder with this name already exists.");
+          folderNameInput.reportValidity();
+          return;
+        }
+        const folder = {
+          id: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name
+        };
+        folders.push(folder);
+        activeFolderId = folder.id;
+        folderNameInput.value = "";
+        folderNameInput.setCustomValidity("");
+        folderForm.hidden = true;
+        persistFolders();
+        renderFolderOptions();
+        renderFolders();
+        renderList();
+      }
+
+      document.getElementById("create-note").addEventListener("click", createNote);
+      document.getElementById("empty-create").addEventListener("click", createNote);
+      document.getElementById("back-button").addEventListener("click", () => app.classList.remove("show-editor"));
+      deleteButton.addEventListener("click", deleteActiveNote);
+      searchInput.addEventListener("input", renderList);
+      titleInput.addEventListener("input", saveEditor);
+      scheduleInput.addEventListener("input", saveEditor);
+      finishInput.addEventListener("input", saveEditor);
+      bodyInput.addEventListener("input", saveEditor);
+      noteFolderSelect.addEventListener("change", saveEditor);
+      profileInput.value = loadProfileName();
+      profileInput.addEventListener("input", persistProfileName);
+      document.getElementById("add-folder").addEventListener("click", () => {
+        folderForm.hidden = false;
+        folderNameInput.focus();
+      });
+      document.getElementById("cancel-folder").addEventListener("click", () => {
+        folderForm.hidden = true;
+        folderNameInput.value = "";
+        folderNameInput.setCustomValidity("");
+      });
+      folderNameInput.addEventListener("input", () => folderNameInput.setCustomValidity(""));
+      folderForm.addEventListener("submit", createFolder);
+      window.addEventListener("beforeunload", () => {
+        window.clearTimeout(saveTimer);
+        const note = notes.find(item => item.id === activeId);
+        if (note) {
+          note.title = titleInput.value;
+          note.body = bodyInput.value;
+          note.scheduledAt = scheduleInput.value;
+          note.finishAt = finishInput.value;
+          note.folderId = noteFolderSelect.value;
+          note.updatedAt = Date.now();
+          persistNotes();
+        }
+      });
+
+      renderFolderOptions("");
+      renderFolders();
+      renderList();
+      showSelection();
+    })();
+  </script>
+</body>
+</html>
